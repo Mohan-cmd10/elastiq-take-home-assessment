@@ -1,26 +1,35 @@
-# QA Selenium Automation with Python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+import time
 
-## Objective
-Create a Selenium automation script in Python to validate search functionality on the **Selenium Playground** website.
+def test_search_table():
+    driver = webdriver.Chrome(ChromeDriverManager().install())
 
-> [!NOTE]
-> **Deliverables:**
-> 1. A Python script (`qa_selenium_test.py`) that:
->    - Navigates to the [Selenium Playground Table Search Demo](https://www.lambdatest.com/selenium-playground/table-sort-search-demo).
->    - Locates and interacts with the search box to search for "New York".
->    - Validates that the search results show **5 entries out of 24 total entries**.
-> 2. A brief **README** explaining the approach and how to run the script.
-> 3. Any additional setup instructions (e.g., local environment, dependencies, drivers etc).
+    try:
+        # Open the page
+        driver.get("https://www.lambdatest.com/selenium-playground/table-sort-search-demo")
+        
+        # Find the search box and search for 'New York'
+        search_box = driver.find_element(By.XPATH, "//*[@id='example_filter']/label/input")
+        search_box.clear()
+        search_box.send_keys("New York")
+        search_box.send_keys(Keys.RETURN)
 
-> [!TIP]
-> Use Python's `pytest` framework to structure your test cases.
+        # Wait for the search results to load
+        time.sleep(2)
 
-> [!IMPORTANT]
-> - **Environment Setup:** Follow good coding practices and ensure the script is compatible with the latest stable Selenium version.
-> - **Browser Compatibility:** Test with at least one major browser (e.g., Chrome, Firefox).
+        # Check if 5 rows are displayed after the search
+        rows = driver.find_elements(By.XPATH, "//*[@id='example']/tbody/tr")
+        assert len(rows) == 5, f"Expected 5 rows but found {len(rows)}"
 
-> [!CAUTION]
-> - **Assertions:** Ensure all validations use robust assertion statements.
-> - **Code Quality:** Follow PEP8 standards for Python code.
+        # Verify that total entries shown are 24
+        total_entries = driver.find_element(By.XPATH, "//*[@id='example_info']").text
+        assert "24" in total_entries, f"Expected total entries to be 24 but found {total_entries}"
+    
+    finally:
+        driver.quit()
 
-**Good luck!**
+if __name__ == "__main__":
+    test_search_table()
